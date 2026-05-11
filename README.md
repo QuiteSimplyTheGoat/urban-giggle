@@ -3,8 +3,7 @@
 Public release bucket for ExsoLauncher runtime artifacts.
 
 This repository intentionally contains only public build scripts and release
-assets. The private `SK-Mod-Launcher` source repository should not be mirrored
-here.
+assets.
 
 ## macOS Java 25 Runtime
 

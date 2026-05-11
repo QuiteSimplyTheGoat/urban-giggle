@@ -1,0 +1,80 @@
+name: Build macOS Java 25 Runtime
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish release assets to java25-macos-exso.1
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: write
+
+jobs:
+  build-arch:
+    name: Build ${{ matrix.arch }} runtime
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: macos-15-intel
+          - arch: aarch64
+            runner: macos-15
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build jlink runtime
+        run: bash scripts/build-macos-runtime.sh "${{ matrix.arch }}" "$PWD/dist"
+      - name: Upload architecture runtime
+        uses: actions/upload-artifact@v4
+        with:
+          name: java_vm-${{ matrix.arch }}
+          path: dist/java_vm-${{ matrix.arch }}
+
+  package:
+    name: Package universal runtime
+    needs: build-arch
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download architecture runtimes
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/parts
+      - name: Package universal runtime
+        run: bash scripts/package-universal-macos-runtime.sh "$PWD/dist/parts" "$PWD/dist/release"
+      - name: Upload release bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: java25-macos-exso-release
+          path: dist/release/*
+
+  publish:
+    name: Publish GitHub Release
+    needs: package
+    if: ${{ github.event.inputs.publish == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: java25-macos-exso-release
+          path: release
+      - name: Publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="java25-macos-exso.1"
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            gh release upload "${tag}" release/* --clobber
+          else
+            gh release create "${tag}" release/* \
+              --title "macOS Java 25 Exso Runtime 1" \
+              --notes "Public macOS Java 25 runtime for ExsoLauncher code-mod mode."
+          fi

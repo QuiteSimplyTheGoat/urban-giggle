@@ -71,10 +71,11 @@ jobs:
         run: |
           set -euo pipefail
           tag="java25-macos-exso.1"
-          if gh release view "${tag}" >/dev/null 2>&1; then
-            gh release upload "${tag}" release/* --clobber
+          repo="${GITHUB_REPOSITORY}"
+          if gh release view "${tag}" --repo "${repo}" >/dev/null 2>&1; then
+            gh release upload "${tag}" release/* --repo "${repo}" --clobber
           else
-            gh release create "${tag}" release/* \
+            gh release create "${tag}" release/* --repo "${repo}" \
               --title "macOS Java 25 Exso Runtime 1" \
               --notes "Public macOS Java 25 runtime for ExsoLauncher code-mod mode."
           fi

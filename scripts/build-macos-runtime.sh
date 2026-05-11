@@ -6,7 +6,7 @@ OUTPUT_DIR="${2:?usage: build-macos-runtime.sh <x64|aarch64> <output-dir>}"
 
 JAVA_VERSION="25.0.1"
 JDK_BUILD_PATH="2fbf10d8c78e40bd87641c434705079d/8/GPL"
-MODULES="java.base,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,jdk.accessibility,jdk.crypto.ec,jdk.unsupported,java.instrument,java.management"
+MODULES="java.base,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,jdk.accessibility,jdk.crypto.ec,jdk.unsupported,java.instrument,java.management,java.naming,java.sql,java.scripting,java.rmi,jdk.attach,jdk.compiler,jdk.httpserver,jdk.jdi"
 
 case "${ARCH}" in
   x64)
@@ -48,7 +48,7 @@ fi
   --no-header-files
 
 cat > "${RUNTIME_DIR}/exso-runtime.properties" <<EOF
-runtimeId=java25-macos-exso.1
+runtimeId=java25-macos-exso.2
 javaVersion=${JAVA_VERSION}
 arch=${ARCH}
 modules=${MODULES}
@@ -56,7 +56,8 @@ EOF
 
 "${RUNTIME_DIR}/bin/java" --list-modules | tee "${OUTPUT_DIR}/modules-${ARCH}.txt"
 
-for required in java.instrument java.management java.desktop jdk.unsupported; do
+IFS=',' read -r -a REQUIRED_MODULES <<< "${MODULES}"
+for required in "${REQUIRED_MODULES[@]}"; do
   if ! grep -q "^${required}@" "${OUTPUT_DIR}/modules-${ARCH}.txt"; then
     echo "jlink output is missing ${required}" >&2
     exit 1

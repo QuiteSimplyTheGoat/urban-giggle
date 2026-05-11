@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: Publish release assets to java25-macos-exso.1
+        description: Publish release assets to java25-macos-exso.2
         required: true
         default: "false"
         type: choice
@@ -70,12 +70,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          tag="java25-macos-exso.1"
+          tag="java25-macos-exso.2"
           repo="${GITHUB_REPOSITORY}"
           if gh release view "${tag}" --repo "${repo}" >/dev/null 2>&1; then
             gh release upload "${tag}" release/* --repo "${repo}" --clobber
           else
             gh release create "${tag}" release/* --repo "${repo}" \
-              --title "macOS Java 25 Exso Runtime 1" \
+              --title "macOS Java 25 Exso Runtime 2" \
               --notes "Public macOS Java 25 runtime for ExsoLauncher code-mod mode."
           fi

@@ -5,11 +5,11 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PARTS_DIR="${1:-${ROOT_DIR}/dist/parts}"
 OUTPUT_DIR="${2:-${ROOT_DIR}/dist/release}"
 
-RUNTIME_ID="java25-macos-exso.1"
+RUNTIME_ID="java25-macos-exso.2"
 JAVA_VERSION="25.0.1"
-ASSET_NAME="java_macos_exso-25.0.1-exso.1.jar"
+ASSET_NAME="java_macos_exso-25.0.1-exso.2.jar"
 MANIFEST_NAME="java25-macos-exso.json"
-MODULES_CSV="java.base,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,jdk.accessibility,jdk.crypto.ec,jdk.unsupported,java.instrument,java.management"
+MODULES_CSV="java.base,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,jdk.accessibility,jdk.crypto.ec,jdk.unsupported,java.instrument,java.management,java.naming,java.sql,java.scripting,java.rmi,jdk.attach,jdk.compiler,jdk.httpserver,jdk.jdi"
 DOWNLOAD_URL="https://github.com/QuiteSimplyTheGoat/urban-giggle/releases/download/${RUNTIME_ID}/${ASSET_NAME}"
 
 resolve_runtime_dir() {
@@ -78,7 +78,8 @@ fi
 
 "${UNIVERSAL_RUNTIME}/bin/java" --list-modules | tee "${MODULES_LIST}"
 
-for required in java.instrument java.management java.desktop jdk.unsupported; do
+IFS=',' read -r -a REQUIRED_MODULES <<< "${MODULES_CSV}"
+for required in "${REQUIRED_MODULES[@]}"; do
   if ! grep -q "^${required}@" "${MODULES_LIST}"; then
     echo "Universal runtime is missing ${required}" >&2
     exit 1

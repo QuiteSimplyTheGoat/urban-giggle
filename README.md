@@ -14,10 +14,10 @@ Release:
 https://github.com/QuiteSimplyTheGoat/urban-giggle/releases/latest/download/java25-macos-exso.json
 ```
 
-Release `java25-macos-exso.1` is expected to publish:
+Release `java25-macos-exso.2` is expected to publish:
 
 - `java25-macos-exso.json`
-- `java_macos_exso-25.0.1-exso.1.jar`
-- `java_macos_exso-25.0.1-exso.1.jar.sha256`
+- `java_macos_exso-25.0.1-exso.2.jar`
+- `java_macos_exso-25.0.1-exso.2.jar.sha256`
 
 The runtime jar is a zip-compatible archive with `java_vm/` at its root.

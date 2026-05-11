@@ -15,11 +15,11 @@ DOWNLOAD_URL="https://github.com/QuiteSimplyTheGoat/urban-giggle/releases/downlo
 resolve_runtime_dir() {
   local arch="$1"
   local base="${PARTS_DIR}/java_vm-${arch}"
-  if [[ -x "${base}/bin/java" ]]; then
+  if [[ -f "${base}/bin/java" ]]; then
     printf '%s\n' "${base}"
     return 0
   fi
-  if [[ -x "${base}/java_vm-${arch}/bin/java" ]]; then
+  if [[ -f "${base}/java_vm-${arch}/bin/java" ]]; then
     printf '%s\n' "${base}/java_vm-${arch}"
     return 0
   fi
@@ -28,10 +28,19 @@ resolve_runtime_dir() {
   return 1
 }
 
+restore_runtime_permissions() {
+  local runtime="$1"
+  find "${runtime}/bin" -type f -exec chmod +x {} \;
+  find "${runtime}/lib" -type f \( -name '*.dylib' -o -name 'jspawnhelper' \) -exec chmod +x {} \;
+}
+
 X64_RUNTIME="$(resolve_runtime_dir x64)"
 ARM_RUNTIME="$(resolve_runtime_dir aarch64)"
 UNIVERSAL_ROOT="${ROOT_DIR}/build/universal"
 UNIVERSAL_RUNTIME="${UNIVERSAL_ROOT}/java_vm"
+
+restore_runtime_permissions "${X64_RUNTIME}"
+restore_runtime_permissions "${ARM_RUNTIME}"
 
 rm -rf "${UNIVERSAL_ROOT}" "${OUTPUT_DIR}"
 mkdir -p "${UNIVERSAL_ROOT}" "${OUTPUT_DIR}"
@@ -58,6 +67,8 @@ javaVersion=${JAVA_VERSION}
 universalMachO=true
 modules=${MODULES_CSV}
 EOF
+
+restore_runtime_permissions "${UNIVERSAL_RUNTIME}"
 
 if [[ -f "${UNIVERSAL_RUNTIME}/release" ]]; then
   awk -F= '$1 != "OS_ARCH" { print }' "${UNIVERSAL_RUNTIME}/release" > "${UNIVERSAL_RUNTIME}/release.tmp"

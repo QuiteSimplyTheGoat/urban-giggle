@@ -12,22 +12,29 @@ MANIFEST_NAME="java25-macos-exso.json"
 MODULES_CSV="java.base,java.datatransfer,java.xml,java.prefs,java.desktop,java.logging,jdk.accessibility,jdk.crypto.ec,jdk.unsupported,java.instrument,java.management"
 DOWNLOAD_URL="https://github.com/QuiteSimplyTheGoat/urban-giggle/releases/download/${RUNTIME_ID}/${ASSET_NAME}"
 
-X64_RUNTIME="${PARTS_DIR}/java_vm-x64"
-ARM_RUNTIME="${PARTS_DIR}/java_vm-aarch64"
+resolve_runtime_dir() {
+  local arch="$1"
+  local base="${PARTS_DIR}/java_vm-${arch}"
+  if [[ -x "${base}/bin/java" ]]; then
+    printf '%s\n' "${base}"
+    return 0
+  fi
+  if [[ -x "${base}/java_vm-${arch}/bin/java" ]]; then
+    printf '%s\n' "${base}/java_vm-${arch}"
+    return 0
+  fi
+  echo "Missing ${arch} runtime under ${base}" >&2
+  find "${base}" -maxdepth 3 -type f -o -type d 2>/dev/null | sort >&2 || true
+  return 1
+}
+
+X64_RUNTIME="$(resolve_runtime_dir x64)"
+ARM_RUNTIME="$(resolve_runtime_dir aarch64)"
 UNIVERSAL_ROOT="${ROOT_DIR}/build/universal"
 UNIVERSAL_RUNTIME="${UNIVERSAL_ROOT}/java_vm"
 
 rm -rf "${UNIVERSAL_ROOT}" "${OUTPUT_DIR}"
 mkdir -p "${UNIVERSAL_ROOT}" "${OUTPUT_DIR}"
-
-if [[ ! -x "${X64_RUNTIME}/bin/java" ]]; then
-  echo "Missing x64 runtime at ${X64_RUNTIME}" >&2
-  exit 1
-fi
-if [[ ! -x "${ARM_RUNTIME}/bin/java" ]]; then
-  echo "Missing arm64 runtime at ${ARM_RUNTIME}" >&2
-  exit 1
-fi
 
 cp -R "${X64_RUNTIME}" "${UNIVERSAL_RUNTIME}"
 

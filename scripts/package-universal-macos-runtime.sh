@@ -38,6 +38,7 @@ X64_RUNTIME="$(resolve_runtime_dir x64)"
 ARM_RUNTIME="$(resolve_runtime_dir aarch64)"
 UNIVERSAL_ROOT="${ROOT_DIR}/build/universal"
 UNIVERSAL_RUNTIME="${UNIVERSAL_ROOT}/java_vm"
+MODULES_LIST="${UNIVERSAL_ROOT}/modules-universal.txt"
 
 restore_runtime_permissions "${X64_RUNTIME}"
 restore_runtime_permissions "${ARM_RUNTIME}"
@@ -75,10 +76,10 @@ if [[ -f "${UNIVERSAL_RUNTIME}/release" ]]; then
   mv "${UNIVERSAL_RUNTIME}/release.tmp" "${UNIVERSAL_RUNTIME}/release"
 fi
 
-"${UNIVERSAL_RUNTIME}/bin/java" --list-modules | tee "${OUTPUT_DIR}/modules-universal.txt"
+"${UNIVERSAL_RUNTIME}/bin/java" --list-modules | tee "${MODULES_LIST}"
 
 for required in java.instrument java.management java.desktop jdk.unsupported; do
-  if ! grep -q "^${required}@" "${OUTPUT_DIR}/modules-universal.txt"; then
+  if ! grep -q "^${required}@" "${MODULES_LIST}"; then
     echo "Universal runtime is missing ${required}" >&2
     exit 1
   fi

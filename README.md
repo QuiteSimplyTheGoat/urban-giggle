@@ -2,9 +2,6 @@
 
 Public release bucket for ExsoLauncher runtime artifacts.
 
-This repository intentionally contains only public build scripts and release
-assets.
-
 ## macOS Java 25 Runtime
 
 The launcher downloads the macOS code-mod runtime from the latest GitHub
